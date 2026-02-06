@@ -169,9 +169,9 @@
         ctx.translate(130, 130);
         ctx.rotate(slice * i + slice / 2);
         ctx.textAlign = "right";
-        ctx.font = "16px Arial";
+        ctx.font = "16px Arial"; // +2px
         ctx.fillStyle = "#333";
-        ctx.fillText(month, 105, 5);
+        ctx.fillText(month, 105, 5); // rapproché du centre
         ctx.restore();
       });
     }
@@ -207,10 +207,10 @@
           drawWheel();
           requestAnimationFrame(animate);
         } else {
-          // ⏸️ PAUSE DE 5 SECONDES AVANT LA PAGE RÉSULTAT
+          // Pause de 3 secondes avant l'écran résultat
           setTimeout(() => {
             showResult(targetMonth);
-          }, 5000);
+          }, 3000);
         }
       }
 
