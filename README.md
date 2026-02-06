@@ -29,12 +29,7 @@
 
     h1 {
       color: #ff6f91;
-      margin-bottom: 12px;
-    }
-
-    .bm-name {
-      font-size: 18px;
-      margin-bottom: 22px;
+      margin-bottom: 14px;
     }
 
     .wheel-wrapper {
@@ -73,11 +68,6 @@
       cursor: pointer;
     }
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
     .result {
       display: none;
     }
@@ -107,7 +97,7 @@
     <!-- ÉCRAN RÉSULTAT -->
     <div id="resultScreen" class="result">
       <h1>🎉 Félicitations 🎉</h1>
-      <div class="bm-name" id="bmName"></div>
+      <div id="bmName"></div>
 
       <p>
         👉 Tu auras des accès admin sur LinkedIn tout au long du mois de
@@ -129,7 +119,7 @@
   </div>
 
   <script>
-    /* MAPPING FINAL */
+    /* 🔒 MAPPING FINAL VERROUILLÉ */
     const mapping = {
       "Fanny": 0,     // Février
       "Anas": 1,      // Mars
@@ -146,7 +136,7 @@
 
     const center = 130;
     const radius = 130;
-    const slice = (2 * Math.PI) / months.length;
+    const sliceAngle = (2 * Math.PI) / months.length;
 
     let rotation = 0;
 
@@ -161,8 +151,8 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       months.forEach((month, i) => {
-        const start = angle + i * slice;
-        const end = start + slice;
+        const start = angle + i * sliceAngle;
+        const end = start + sliceAngle;
 
         ctx.beginPath();
         ctx.moveTo(center, center);
@@ -172,7 +162,7 @@
 
         ctx.save();
         ctx.translate(center, center);
-        ctx.rotate(start + slice / 2);
+        ctx.rotate(start + sliceAngle / 2);
         ctx.textAlign = "right";
         ctx.font = "16px Arial";
         ctx.fillStyle = "#333";
@@ -185,30 +175,32 @@
 
     document.getElementById("spinBtn").addEventListener("click", () => {
       const index = mapping[bmName];
-      const targetAngle =
-        (Math.PI * 2 * 2) +          // 2 tours complets
-        (-Math.PI / 2) -             // curseur en haut
-        (index * slice + slice / 2); // centre du bon mois
 
-      const start = rotation;
-      const end = targetAngle;
-      const duration = 3000; // ⏱️ 3 secondes de rotation
+      const tours = 3; // 🎡 tours complets
+      const targetRotation =
+        tours * 2 * Math.PI
+        - (index + 0.5) * sliceAngle
+        - Math.PI / 2;
+
+      const startRotation = rotation;
+      const endRotation = targetRotation;
+      const duration = 3000; // ⏱️ 3 secondes
       let startTime = null;
 
       function animate(time) {
         if (!startTime) startTime = time;
         const progress = Math.min((time - startTime) / duration, 1);
 
-        rotation = start + (end - start) * progress;
+        rotation =
+          startRotation + (endRotation - startRotation) * progress;
+
         drawWheel(rotation);
 
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
-          // ⏸️ arrêt 5 secondes sur le bon mois
-          setTimeout(() => {
-            showResult(index);
-          }, 5000);
+          // ⏸️ arrêt 5 secondes sur le BON mois
+          setTimeout(() => showResult(index), 5000);
         }
       }
 
