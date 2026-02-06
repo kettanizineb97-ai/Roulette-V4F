@@ -5,38 +5,26 @@
   <title>Roue des mois – V4F</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+    * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
 
     body {
       margin: 0;
       height: 100vh;
       background: linear-gradient(135deg, #fdf2f8, #eef6ff);
       display: flex;
-      align-items: center;
       justify-content: center;
-      color: #111;
+      align-items: center;
     }
 
-    .container {
-      text-align: center;
-      max-width: 600px;
-      width: 100%;
-      padding: 40px 20px;
-    }
+    .container { text-align: center; }
 
-    h1 {
-      color: #ff6f91;
-      margin-bottom: 14px;
-    }
+    h1 { color: #ff6f91; }
 
     .wheel-wrapper {
       position: relative;
-      margin: 0 auto 32px;
       width: 260px;
       height: 260px;
+      margin: 30px auto;
     }
 
     .pointer {
@@ -54,8 +42,7 @@
 
     canvas {
       border-radius: 50%;
-      background: white;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
 
     button {
@@ -68,21 +55,14 @@
       cursor: pointer;
     }
 
-    .result {
-      display: none;
-    }
-
-    .month {
-      font-weight: bold;
-      color: #ff6f91;
-    }
+    .result { display: none; }
+    .month { color: #ff6f91; font-weight: bold; }
   </style>
 </head>
 
 <body>
   <div class="container">
 
-    <!-- ÉCRAN ROUE -->
     <div id="wheelScreen">
       <h1>Tournez la roue et découvrez quel mois vous sera attribué 😜</h1>
 
@@ -94,125 +74,108 @@
       <button id="spinBtn">Tourner</button>
     </div>
 
-    <!-- ÉCRAN RÉSULTAT -->
     <div id="resultScreen" class="result">
       <h1>🎉 Félicitations 🎉</h1>
       <div id="bmName"></div>
 
-      <p>
-        👉 Tu auras des accès admin sur LinkedIn tout au long du mois de
+      <p>👉 Tu auras des accès admin sur LinkedIn tout au long du mois de
         <span class="month" id="monthResult"></span>.
       </p>
 
       <p><strong>250 crédits</strong> te seront accordés au courant de ce mois.</p>
 
-      <p>
-        À toi d’envoyer les demandes de suivi de la page
-        <strong>LinkedIn V4F</strong> à ton réseau.
-      </p>
+      <p>À toi d’envoyer les demandes de suivi de la page <strong>LinkedIn V4F</strong>.</p>
 
-      <p>
-        <strong>Merci à toi de donner un coup de boost à la visibilité de V4F !</strong>
-      </p>
+      <p><strong>Merci à toi de donner un coup de boost à la visibilité de V4F !</strong></p>
     </div>
 
   </div>
 
-  <script>
-    /* 🔒 MAPPING FINAL VERROUILLÉ */
-    const mapping = {
-      "Fanny": 0,     // Février
-      "Anas": 1,      // Mars
-      "Clémence": 2,  // Avril
-      "Thomas": 3,    // Mai
-      "Tariq": 4      // Juin
-    };
+<script>
+  /* ✅ Mapping verrouillé */
+  const mapping = {
+    Fanny: 0,     // Février
+    Anas: 1,      // Mars
+    Clémence: 2,  // Avril
+    Thomas: 3,    // Mai
+    Tariq: 4      // Juin
+  };
 
-    const months = ["Février", "Mars", "Avril", "Mai", "Juin"];
-    const colors = ["#ffc6d9", "#9be7c4", "#ffe066", "#cdb4ff", "#ffd6a5"];
+  const months = ["Février", "Mars", "Avril", "Mai", "Juin"];
+  const colors = ["#ffc6d9", "#9be7c4", "#ffe066", "#cdb4ff", "#ffd6a5"];
 
-    const canvas = document.getElementById("wheel");
-    const ctx = canvas.getContext("2d");
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+  const center = 130;
+  const radius = 130;
+  const slice = (2 * Math.PI) / months.length;
 
-    const center = 130;
-    const radius = 130;
-    const sliceAngle = (2 * Math.PI) / months.length;
+  let rotation = -Math.PI / 2; // 🔑 ALIGNEMENT INITIAL AVEC LE CURSEUR
 
-    let rotation = 0;
+  const bmName = prompt("Entre ton prénom :");
 
-    const bmName = prompt("Entre ton prénom :");
+  if (!(bmName in mapping)) {
+    alert("Prénom non reconnu.");
+    location.reload();
+  }
 
-    if (!(bmName in mapping)) {
-      alert("Prénom non reconnu.");
-      location.reload();
-    }
+  function drawWheel(angle) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    function drawWheel(angle = 0) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    months.forEach((month, i) => {
+      const start = angle + i * slice;
+      const end = start + slice;
 
-      months.forEach((month, i) => {
-        const start = angle + i * sliceAngle;
-        const end = start + sliceAngle;
+      ctx.beginPath();
+      ctx.moveTo(center, center);
+      ctx.arc(center, center, radius, start, end);
+      ctx.fillStyle = colors[i];
+      ctx.fill();
 
-        ctx.beginPath();
-        ctx.moveTo(center, center);
-        ctx.arc(center, center, radius, start, end);
-        ctx.fillStyle = colors[i];
-        ctx.fill();
-
-        ctx.save();
-        ctx.translate(center, center);
-        ctx.rotate(start + sliceAngle / 2);
-        ctx.textAlign = "right";
-        ctx.font = "16px Arial";
-        ctx.fillStyle = "#333";
-        ctx.fillText(month, radius - 25, 5);
-        ctx.restore();
-      });
-    }
-
-    drawWheel();
-
-    document.getElementById("spinBtn").addEventListener("click", () => {
-      const index = mapping[bmName];
-
-      const tours = 3; // 🎡 tours complets
-      const targetRotation =
-        tours * 2 * Math.PI
-        - (index + 0.5) * sliceAngle
-        - Math.PI / 2;
-
-      const startRotation = rotation;
-      const endRotation = targetRotation;
-      const duration = 3000; // ⏱️ 3 secondes
-      let startTime = null;
-
-      function animate(time) {
-        if (!startTime) startTime = time;
-        const progress = Math.min((time - startTime) / duration, 1);
-
-        rotation =
-          startRotation + (endRotation - startRotation) * progress;
-
-        drawWheel(rotation);
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          // ⏸️ arrêt 5 secondes sur le BON mois
-          setTimeout(() => showResult(index), 5000);
-        }
-      }
-
-      requestAnimationFrame(animate);
+      ctx.save();
+      ctx.translate(center, center);
+      ctx.rotate(start + slice / 2);
+      ctx.textAlign = "right";
+      ctx.font = "16px Arial";
+      ctx.fillStyle = "#333";
+      ctx.fillText(month, radius - 25, 5);
+      ctx.restore();
     });
+  }
 
-    function showResult(index) {
-      document.getElementById("wheelScreen").style.display = "none";
-      document.getElementById("resultScreen").style.display = "block";
-      document.getElementById("monthResult").textContent = months[index];
-      document.getElementById("bmName").textContent = bmName;
+  drawWheel(rotation);
+
+  document.getElementById("spinBtn").onclick = () => {
+    const index = mapping[bmName];
+    const target =
+      -Math.PI / 2
+      - index * slice
+      + 3 * 2 * Math.PI;
+
+    const start = rotation;
+    const duration = 3000;
+    let startTime = null;
+
+    function animate(t) {
+      if (!startTime) startTime = t;
+      const p = Math.min((t - startTime) / duration, 1);
+      rotation = start + (target - start) * p;
+      drawWheel(rotation);
+
+      if (p < 1) requestAnimationFrame(animate);
+      else setTimeout(() => showResult(index), 5000);
     }
-  </script>
+
+    requestAnimationFrame(animate);
+  };
+
+  function showResult(index) {
+    document.getElementById("wheelScreen").style.display = "none";
+    document.getElementById("resultScreen").style.display = "block";
+    document.getElementById("monthResult").textContent = months[index];
+    document.getElementById("bmName").textContent = bmName;
+  }
+</script>
+
 </body>
 </html>
