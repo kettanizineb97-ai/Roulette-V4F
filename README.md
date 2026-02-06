@@ -129,7 +129,7 @@
   </div>
 
   <script>
-    /* ATTRIBUTIONS FIXES (LOGIQUE MASQUÉE) */
+    /* MAPPING FIXE ET CORRECT */
     const mapping = {
       "Fanny": "Février",
       "Anas": "Mars",
@@ -145,7 +145,11 @@
     const ctx = canvas.getContext("2d");
     const spinBtn = document.getElementById("spinBtn");
 
-    let angle = 0;
+    const center = 130;
+    const radius = 130;
+    const sliceAngle = (2 * Math.PI) / months.length;
+
+    let currentRotation = 0;
 
     const bmName = prompt("Entre ton prénom :");
 
@@ -154,24 +158,26 @@
       location.reload();
     }
 
-    function drawWheel() {
-      const slice = (2 * Math.PI) / months.length;
+    function drawWheel(rotation = 0) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       months.forEach((month, i) => {
+        const startAngle = rotation + i * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
         ctx.beginPath();
-        ctx.moveTo(130, 130);
-        ctx.arc(130, 130, 130, slice * i, slice * (i + 1));
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, radius, startAngle, endAngle);
         ctx.fillStyle = colors[i];
         ctx.fill();
 
         ctx.save();
-        ctx.translate(130, 130);
-        ctx.rotate(slice * i + slice / 2);
+        ctx.translate(center, center);
+        ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
         ctx.font = "16px Arial";
         ctx.fillStyle = "#333";
-        ctx.fillText(month, 105, 5);
+        ctx.fillText(month, radius - 25, 5);
         ctx.restore();
       });
     }
@@ -182,32 +188,32 @@
       spinBtn.disabled = true;
 
       const targetMonth = mapping[bmName];
-      const monthIndex = months.indexOf(targetMonth);
-      const sliceDeg = 360 / months.length;
+      const index = months.indexOf(targetMonth);
 
-      const targetAngle =
-        360 * 4 +
-        (360 - (monthIndex * sliceDeg + sliceDeg / 2));
+      // Le curseur est à -90° (haut)
+      const targetRotation =
+        (Math.PI * 2 * 3) + // 3 tours complets
+        (-Math.PI / 2) -    // position du curseur
+        (index * sliceAngle + sliceAngle / 2);
 
-      let start = angle;
-      let end = (targetAngle * Math.PI) / 180;
-      let duration = 2000;
+      const startRotation = currentRotation;
+      const duration = 2000;
       let startTime = null;
 
       function animate(time) {
         if (!startTime) startTime = time;
-        let progress = (time - startTime) / duration;
+        const progress = Math.min((time - startTime) / duration, 1);
+
+        currentRotation =
+          startRotation +
+          (targetRotation - startRotation) * progress;
+
+        drawWheel(currentRotation);
 
         if (progress < 1) {
-          angle = start + (end - start) * progress;
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.translate(130, 130);
-          ctx.rotate(angle);
-          ctx.translate(-130, -130);
-          drawWheel();
           requestAnimationFrame(animate);
         } else {
-          // ⏸️ PAUSE DE 5 SECONDES AVEC ROUE FIGÉE
+          // ⏸️ PAUSE DE 5 SECONDES SUR LE BON MOIS
           setTimeout(() => {
             showResult(targetMonth);
           }, 5000);
