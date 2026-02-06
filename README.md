@@ -129,13 +129,13 @@
   </div>
 
   <script>
-    /* MAPPING FIXE ET CORRECT */
+    /* MAPPING FINAL */
     const mapping = {
-      "Fanny": "Février",
-      "Anas": "Mars",
-      "Clémence": "Avril",
-      "Thomas": "Mai",
-      "Tariq": "Juin"
+      "Fanny": 0,     // Février
+      "Anas": 1,      // Mars
+      "Clémence": 2,  // Avril
+      "Thomas": 3,    // Mai
+      "Tariq": 4      // Juin
     };
 
     const months = ["Février", "Mars", "Avril", "Mai", "Juin"];
@@ -143,37 +143,36 @@
 
     const canvas = document.getElementById("wheel");
     const ctx = canvas.getContext("2d");
-    const spinBtn = document.getElementById("spinBtn");
 
     const center = 130;
     const radius = 130;
-    const sliceAngle = (2 * Math.PI) / months.length;
+    const slice = (2 * Math.PI) / months.length;
 
-    let currentRotation = 0;
+    let rotation = 0;
 
     const bmName = prompt("Entre ton prénom :");
 
-    if (!mapping[bmName]) {
+    if (!(bmName in mapping)) {
       alert("Prénom non reconnu.");
       location.reload();
     }
 
-    function drawWheel(rotation = 0) {
+    function drawWheel(angle = 0) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       months.forEach((month, i) => {
-        const startAngle = rotation + i * sliceAngle;
-        const endAngle = startAngle + sliceAngle;
+        const start = angle + i * slice;
+        const end = start + slice;
 
         ctx.beginPath();
         ctx.moveTo(center, center);
-        ctx.arc(center, center, radius, startAngle, endAngle);
+        ctx.arc(center, center, radius, start, end);
         ctx.fillStyle = colors[i];
         ctx.fill();
 
         ctx.save();
         ctx.translate(center, center);
-        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.rotate(start + slice / 2);
         ctx.textAlign = "right";
         ctx.font = "16px Arial";
         ctx.fillStyle = "#333";
@@ -184,38 +183,31 @@
 
     drawWheel();
 
-    spinBtn.addEventListener("click", () => {
-      spinBtn.disabled = true;
+    document.getElementById("spinBtn").addEventListener("click", () => {
+      const index = mapping[bmName];
+      const targetAngle =
+        (Math.PI * 2 * 2) +          // 2 tours complets
+        (-Math.PI / 2) -             // curseur en haut
+        (index * slice + slice / 2); // centre du bon mois
 
-      const targetMonth = mapping[bmName];
-      const index = months.indexOf(targetMonth);
-
-      // Le curseur est à -90° (haut)
-      const targetRotation =
-        (Math.PI * 2 * 3) + // 3 tours complets
-        (-Math.PI / 2) -    // position du curseur
-        (index * sliceAngle + sliceAngle / 2);
-
-      const startRotation = currentRotation;
-      const duration = 2000;
+      const start = rotation;
+      const end = targetAngle;
+      const duration = 3000; // ⏱️ 3 secondes de rotation
       let startTime = null;
 
       function animate(time) {
         if (!startTime) startTime = time;
         const progress = Math.min((time - startTime) / duration, 1);
 
-        currentRotation =
-          startRotation +
-          (targetRotation - startRotation) * progress;
-
-        drawWheel(currentRotation);
+        rotation = start + (end - start) * progress;
+        drawWheel(rotation);
 
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
-          // ⏸️ PAUSE DE 5 SECONDES SUR LE BON MOIS
+          // ⏸️ arrêt 5 secondes sur le bon mois
           setTimeout(() => {
-            showResult(targetMonth);
+            showResult(index);
           }, 5000);
         }
       }
@@ -223,10 +215,10 @@
       requestAnimationFrame(animate);
     });
 
-    function showResult(month) {
+    function showResult(index) {
       document.getElementById("wheelScreen").style.display = "none";
       document.getElementById("resultScreen").style.display = "block";
-      document.getElementById("monthResult").textContent = month;
+      document.getElementById("monthResult").textContent = months[index];
       document.getElementById("bmName").textContent = bmName;
     }
   </script>
