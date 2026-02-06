@@ -29,17 +29,17 @@
 
     h1 {
       color: #ff6f91;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .bm-name {
       font-size: 18px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
 
     .wheel-wrapper {
       position: relative;
-      margin: 0 auto 30px;
+      margin: 0 auto 32px;
       width: 260px;
       height: 260px;
     }
@@ -129,7 +129,7 @@
   </div>
 
   <script>
-    /* ATTRIBUTIONS FIXES (MASQUÉES) */
+    /* ATTRIBUTIONS FIXES (LOGIQUE MASQUÉE) */
     const mapping = {
       "Fanny": "Février",
       "Anas": "Mars",
@@ -169,9 +169,9 @@
         ctx.translate(130, 130);
         ctx.rotate(slice * i + slice / 2);
         ctx.textAlign = "right";
-        ctx.font = "16px Arial"; // +2px
+        ctx.font = "16px Arial";
         ctx.fillStyle = "#333";
-        ctx.fillText(month, 105, 5); // rapproché du centre
+        ctx.fillText(month, 105, 5);
         ctx.restore();
       });
     }
@@ -207,10 +207,10 @@
           drawWheel();
           requestAnimationFrame(animate);
         } else {
-          // Pause de 3 secondes avant l'écran résultat
+          // ⏸️ PAUSE DE 5 SECONDES AVEC ROUE FIGÉE
           setTimeout(() => {
             showResult(targetMonth);
-          }, 3000);
+          }, 5000);
         }
       }
 
