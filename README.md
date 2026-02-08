@@ -117,95 +117,103 @@
       </p>
 
       <p>
-        <strong>Merci à toi de donner un coup de boost à la visibilité de V4F !</strong>
+        <strong>Merci de donner un coup de boost à la visibilité de V4F !</strong>
       </p>
     </div>
 
   </div>
 
-  <script>
-    const months = ["Février", "Mars", "Avril", "Mai", "Juin", "Juillet"];
-    const colors = [
-      "#ffc6d9", // rose
-      "#9be7c4", // vert
-      "#ffe066", // jaune
-      "#cdb4ff", // violet
-      "#ffd6a5", // orange
-      "#bde0fe"  // bleu pastel (juillet)
-    ];
+<script>
+  /* MOIS + COULEURS */
+  const months = ["Février", "Mars", "Avril", "Mai", "Juin", "Juillet"];
+  const colors = [
+    "#ffc6d9",
+    "#9be7c4",
+    "#ffe066",
+    "#cdb4ff",
+    "#ffd6a5",
+    "#bde0fe"
+  ];
 
-    const canvas = document.getElementById("wheel");
-    const ctx = canvas.getContext("2d");
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
 
-    const center = 130;
-    const radius = 130;
-    const slice = (2 * Math.PI) / months.length;
+  const center = 130;
+  const radius = 130;
+  const slice = (2 * Math.PI) / months.length;
 
-    let rotation = -Math.PI / 2;
+  let rotation = -Math.PI / 2;
 
-    const bmName = prompt("Entre ton prénom :");
+  const bmName = prompt(
+    "Entre ton prénom (Michaël, Fanny, Clémence, Thomas, Tariq, Anas)"
+  );
 
-    function drawWheel(angle) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function drawWheel(angle) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      months.forEach((month, i) => {
-        const start = angle + i * slice;
-        const end = start + slice;
+    months.forEach((month, i) => {
+      const start = angle + i * slice;
+      const end = start + slice;
 
-        ctx.beginPath();
-        ctx.moveTo(center, center);
-        ctx.arc(center, center, radius, start, end);
-        ctx.fillStyle = colors[i];
-        ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(center, center);
+      ctx.arc(center, center, radius, start, end);
+      ctx.fillStyle = colors[i];
+      ctx.fill();
 
-        ctx.save();
-        ctx.translate(center, center);
-        ctx.rotate(start + slice / 2);
-        ctx.textAlign = "right";
-        ctx.font = "16px Arial";
-        ctx.fillStyle = "#333";
-        ctx.fillText(month, radius - 25, 5);
-        ctx.restore();
-      });
-    }
+      ctx.save();
+      ctx.translate(center, center);
+      ctx.rotate(start + slice / 2);
+      ctx.textAlign = "right";
+      ctx.font = "16px Arial";
+      ctx.fillStyle = "#333";
+      ctx.fillText(month, radius - 25, 5);
+      ctx.restore();
+    });
+  }
 
-    drawWheel(rotation);
+  drawWheel(rotation);
 
-    document.getElementById("spinBtn").onclick = () => {
-      const index = Math.floor(Math.random() * months.length);
+  document.getElementById("spinBtn").onclick = () => {
+    document.getElementById("spinBtn").disabled = true;
 
-      const targetRotation =
-        -Math.PI / 2
-        - index * slice
-        + 3 * 2 * Math.PI;
+    // 🎲 tirage aléatoire du mois
+    const index = Math.floor(Math.random() * months.length);
 
-      const start = rotation;
-      const duration = 3000;
-      let startTime = null;
+    const targetRotation =
+      -Math.PI / 2
+      - index * slice
+      + 2 * 2 * Math.PI;
 
-      function animate(time) {
-        if (!startTime) startTime = time;
-        const progress = Math.min((time - startTime) / duration, 1);
+    const start = rotation;
+    const duration = 3000; // ⏱️ 3 secondes de rotation
+    let startTime = null;
 
-        rotation = start + (targetRotation - start) * progress;
-        drawWheel(rotation);
+    function animate(time) {
+      if (!startTime) startTime = time;
+      const progress = Math.min((time - startTime) / duration, 1);
 
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          setTimeout(() => showResult(index), 5000);
-        }
+      rotation = start + (targetRotation - start) * progress;
+      drawWheel(rotation);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // ➜ affichage immédiat du message après les 3 secondes
+        showResult(index);
       }
-
-      requestAnimationFrame(animate);
-    };
-
-    function showResult(index) {
-      document.getElementById("wheelScreen").style.display = "none";
-      document.getElementById("resultScreen").style.display = "block";
-      document.getElementById("monthResult").textContent = months[index];
-      document.getElementById("bmName").textContent = bmName;
     }
-  </script>
+
+    requestAnimationFrame(animate);
+  };
+
+  function showResult(index) {
+    document.getElementById("wheelScreen").style.display = "none";
+    document.getElementById("resultScreen").style.display = "block";
+    document.getElementById("monthResult").textContent = months[index];
+    document.getElementById("bmName").textContent = bmName;
+  }
+</script>
+
 </body>
 </html>
