@@ -29,12 +29,17 @@
 
     h1 {
       color: #ff6f91;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
+    }
+
+    .bm-name {
+      font-size: 18px;
+      margin-bottom: 20px;
     }
 
     .wheel-wrapper {
       position: relative;
-      margin: 0 auto 32px;
+      margin: 0 auto 30px;
       width: 260px;
       height: 260px;
     }
@@ -55,7 +60,7 @@
     canvas {
       border-radius: 50%;
       background: white;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
     button {
@@ -102,7 +107,7 @@
     <!-- ÉCRAN RÉSULTAT -->
     <div id="resultScreen" class="result">
       <h1>🎉 Félicitations 🎉</h1>
-      <div id="bmName"></div>
+      <div class="bm-name" id="bmName"></div>
 
       <p>
         👉 Tu auras des accès admin sur LinkedIn tout au long du mois de
@@ -117,103 +122,108 @@
       </p>
 
       <p>
-        <strong>Merci de donner un coup de boost à la visibilité de V4F !</strong>
+        <strong>Merci à toi de donner un coup de boost à la visibilité de V4F !</strong>
       </p>
     </div>
 
   </div>
 
-<script>
-  /* MOIS + COULEURS */
-  const months = ["Février", "Mars", "Avril", "Mai", "Juin", "Juillet"];
-  const colors = [
-    "#ffc6d9",
-    "#9be7c4",
-    "#ffe066",
-    "#cdb4ff",
-    "#ffd6a5",
-    "#bde0fe"
-  ];
+  <script>
+    /* ATTRIBUTIONS FIXES (MASQUÉES) */
+    const mapping = {
+      "Fanny": "Février",
+      "Anas": "Mars",
+      "Clémence": "Avril",
+      "Thomas": "Mai",
+      "Tariq": "Juin",
+      "Michaël": "Juillet",
+    };
 
-  const canvas = document.getElementById("wheel");
-  const ctx = canvas.getContext("2d");
+    const months = ["Février", "Mars", "Avril", "Mai", "Juin", "Juillet"];
+    const colors = ["#ffc6d9", "#9be7c4", "#ffe066", "#cdb4ff", "#ffd6a5", "#bde0fe"];
 
-  const center = 130;
-  const radius = 130;
-  const slice = (2 * Math.PI) / months.length;
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    const spinBtn = document.getElementById("spinBtn");
 
-  let rotation = -Math.PI / 2;
+    let angle = 0;
 
-  const bmName = prompt(
-    "Entre ton prénom"
-  );
+    const bmName = prompt("Entre ton prénom :");
 
-  function drawWheel(angle) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    months.forEach((month, i) => {
-      const start = angle + i * slice;
-      const end = start + slice;
-
-      ctx.beginPath();
-      ctx.moveTo(center, center);
-      ctx.arc(center, center, radius, start, end);
-      ctx.fillStyle = colors[i];
-      ctx.fill();
-
-      ctx.save();
-      ctx.translate(center, center);
-      ctx.rotate(start + slice / 2);
-      ctx.textAlign = "right";
-      ctx.font = "16px Arial";
-      ctx.fillStyle = "#333";
-      ctx.fillText(month, radius - 25, 5);
-      ctx.restore();
-    });
-  }
-
-  drawWheel(rotation);
-
-  document.getElementById("spinBtn").onclick = () => {
-    document.getElementById("spinBtn").disabled = true;
-
-    // 🎲 tirage aléatoire du mois
-    const index = Math.floor(Math.random() * months.length);
-
-    const targetRotation =
-      -Math.PI / 2
-      - index * slice
-      + 2 * 2 * Math.PI;
-
-    const start = rotation;
-    const duration = 3000; // ⏱️ 3 secondes de rotation
-    let startTime = null;
-
-    function animate(time) {
-      if (!startTime) startTime = time;
-      const progress = Math.min((time - startTime) / duration, 1);
-
-      rotation = start + (targetRotation - start) * progress;
-      drawWheel(rotation);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        // ➜ affichage immédiat du message après les 3 secondes
-        showResult(index);
-      }
+    if (!mapping[bmName]) {
+      alert("Prénom non reconnu.");
+      location.reload();
     }
 
-    requestAnimationFrame(animate);
-  };
+    function drawWheel() {
+      const slice = (2 * Math.PI) / months.length;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  function showResult(index) {
-    document.getElementById("wheelScreen").style.display = "none";
-    document.getElementById("resultScreen").style.display = "block";
-    document.getElementById("monthResult").textContent = months[index];
-    document.getElementById("bmName").textContent = bmName;
-  }
-</script>
+      months.forEach((month, i) => {
+        ctx.beginPath();
+        ctx.moveTo(130, 130);
+        ctx.arc(130, 130, 130, slice * i, slice * (i + 1));
+        ctx.fillStyle = colors[i];
+        ctx.fill();
 
+        ctx.save();
+        ctx.translate(130, 130);
+        ctx.rotate(slice * i + slice / 2);
+        ctx.textAlign = "right";
+        ctx.font = "16px Arial"; // +2px
+        ctx.fillStyle = "#333";
+        ctx.fillText(month, 105, 5); // rapproché du centre
+        ctx.restore();
+      });
+    }
+
+    drawWheel();
+
+    spinBtn.addEventListener("click", () => {
+      spinBtn.disabled = true;
+
+      const targetMonth = mapping[bmName];
+      const monthIndex = months.indexOf(targetMonth);
+      const sliceDeg = 360 / months.length;
+
+      const targetAngle =
+        360 * 4 +
+        (360 - (monthIndex * sliceDeg + sliceDeg / 2));
+
+      let start = angle;
+      let end = (targetAngle * Math.PI) / 180;
+      let duration = 2000;
+      let startTime = null;
+
+      function animate(time) {
+        if (!startTime) startTime = time;
+        let progress = (time - startTime) / duration;
+
+        if (progress < 1) {
+          angle = start + (end - start) * progress;
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.translate(130, 130);
+          ctx.rotate(angle);
+          ctx.translate(-130, -130);
+          drawWheel();
+          requestAnimationFrame(animate);
+        } else {
+          // Pause de 3 secondes avant l'écran résultat
+          setTimeout(() => {
+            showResult(targetMonth);
+          }, 3000);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    });
+
+    function showResult(month) {
+      document.getElementById("wheelScreen").style.display = "none";
+      document.getElementById("resultScreen").style.display = "block";
+      document.getElementById("monthResult").textContent = month;
+      document.getElementById("bmName").textContent = bmName;
+    }
+  </script>
 </body>
 </html>
