@@ -92,7 +92,6 @@
 <body>
   <div class="container">
 
-    <!-- ÉCRAN ROUE -->
     <div id="wheelScreen">
       <h1>Tournez la roue et découvrez quel mois vous sera attribué 😜</h1>
 
@@ -104,7 +103,6 @@
       <button id="spinBtn">Tourner</button>
     </div>
 
-    <!-- ÉCRAN RÉSULTAT -->
     <div id="resultScreen" class="result">
       <h1>🎉 Félicitations 🎉</h1>
       <div class="bm-name" id="bmName"></div>
@@ -122,108 +120,105 @@
       </p>
 
       <p>
-        <strong>Merci à toi de donner un coup de boost à la visibilité de V4F !</strong>
+        <strong>Merci de donner un coup de boost à la visibilité de V4F !</strong>
       </p>
     </div>
 
   </div>
 
-  <script>
-    /* ATTRIBUTIONS FIXES (MASQUÉES) */
-    const mapping = {
-      "Fanny": "Février",
-      "Anas": "Mars",
-      "Clémence": "Avril",
-      "Thomas": "Mai",
-      "Tariq": "Juin",
-      "Michaël": "Juillet",
-    };
+<script>
+  /* MAPPING FIXE */
+  const mapping = {
+    "Fanny": "Février",
+    "Anas": "Mars",
+    "Clémence": "Avril",
+    "Thomas": "Mai",
+    "Tariq": "Juin",
+    "Michaël": "Juillet"
+  };
 
-    const months = ["Février", "Mars", "Avril", "Mai", "Juin", "Juillet"];
-    const colors = ["#ffc6d9", "#9be7c4", "#ffe066", "#cdb4ff", "#ffd6a5", "#bde0fe"];
+  const months = ["Février", "Mars", "Avril", "Mai", "Juin", "Juillet"];
+  const colors = ["#ffc6d9", "#9be7c4", "#ffe066", "#cdb4ff", "#ffd6a5", "#bde0fe"];
 
-    const canvas = document.getElementById("wheel");
-    const ctx = canvas.getContext("2d");
-    const spinBtn = document.getElementById("spinBtn");
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
 
-    let angle = 0;
+  const center = 130;
+  const radius = 130;
+  const slice = (2 * Math.PI) / months.length;
 
-    const bmName = prompt("Entre ton prénom :");
+  let rotation = 0;
 
-    if (!mapping[bmName]) {
-      alert("Prénom non reconnu.");
-      location.reload();
-    }
+  const bmName = prompt("Entre ton prénom :");
 
-    function drawWheel() {
-      const slice = (2 * Math.PI) / months.length;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!mapping[bmName]) {
+    alert("Prénom non reconnu.");
+    location.reload();
+  }
 
-      months.forEach((month, i) => {
-        ctx.beginPath();
-        ctx.moveTo(130, 130);
-        ctx.arc(130, 130, 130, slice * i, slice * (i + 1));
-        ctx.fillStyle = colors[i];
-        ctx.fill();
+  function drawWheel(angle) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.save();
-        ctx.translate(130, 130);
-        ctx.rotate(slice * i + slice / 2);
-        ctx.textAlign = "right";
-        ctx.font = "16px Arial"; // +2px
-        ctx.fillStyle = "#333";
-        ctx.fillText(month, 105, 5); // rapproché du centre
-        ctx.restore();
-      });
-    }
+    months.forEach((month, i) => {
+      const start = angle + i * slice;
+      const end = start + slice;
 
-    drawWheel();
+      ctx.beginPath();
+      ctx.moveTo(center, center);
+      ctx.arc(center, center, radius, start, end);
+      ctx.fillStyle = colors[i];
+      ctx.fill();
 
-    spinBtn.addEventListener("click", () => {
-      spinBtn.disabled = true;
-
-      const targetMonth = mapping[bmName];
-      const monthIndex = months.indexOf(targetMonth);
-      const sliceDeg = 360 / months.length;
-
-      const targetAngle =
-        360 * 4 +
-        (360 - (monthIndex * sliceDeg + sliceDeg / 2));
-
-      let start = angle;
-      let end = (targetAngle * Math.PI) / 180;
-      let duration = 2000;
-      let startTime = null;
-
-      function animate(time) {
-        if (!startTime) startTime = time;
-        let progress = (time - startTime) / duration;
-
-        if (progress < 1) {
-          angle = start + (end - start) * progress;
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.translate(130, 130);
-          ctx.rotate(angle);
-          ctx.translate(-130, -130);
-          drawWheel();
-          requestAnimationFrame(animate);
-        } else {
-          // Pause de 3 secondes avant l'écran résultat
-          setTimeout(() => {
-            showResult(targetMonth);
-          }, 3000);
-        }
-      }
-
-      requestAnimationFrame(animate);
+      ctx.save();
+      ctx.translate(center, center);
+      ctx.rotate(start + slice / 2);
+      ctx.textAlign = "right";
+      ctx.font = "16px Arial";
+      ctx.fillStyle = "#333";
+      ctx.fillText(month, radius - 25, 5);
+      ctx.restore();
     });
+  }
 
-    function showResult(month) {
-      document.getElementById("wheelScreen").style.display = "none";
-      document.getElementById("resultScreen").style.display = "block";
-      document.getElementById("monthResult").textContent = month;
-      document.getElementById("bmName").textContent = bmName;
+  drawWheel(rotation);
+
+  document.getElementById("spinBtn").onclick = () => {
+    const targetMonth = mapping[bmName];
+    const index = months.indexOf(targetMonth);
+
+    const targetRotation =
+      3 * 2 * Math.PI
+      - (index + 0.5) * slice
+      - Math.PI / 2;
+
+    const start = rotation;
+    const duration = 3000;
+    let startTime = null;
+
+    function animate(time) {
+      if (!startTime) startTime = time;
+      const progress = Math.min((time - startTime) / duration, 1);
+
+      rotation = start + (targetRotation - start) * progress;
+      drawWheel(rotation);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        showResult(targetMonth);
+      }
     }
-  </script>
+
+    requestAnimationFrame(animate);
+  };
+
+  function showResult(month) {
+    document.getElementById("wheelScreen").style.display = "none";
+    document.getElementById("resultScreen").style.display = "block";
+    document.getElementById("monthResult").textContent = month;
+    document.getElementById("bmName").textContent = bmName;
+  }
+</script>
+
 </body>
 </html>
